@@ -1,0 +1,86 @@
+# Custom properties to ease configuration overrides
+# on command-line or IDE launch configurations
+scheme: http
+hostname: localhost
+reverse-proxy-port: 7085
+authorization-server-port: 8080
+authorization-server-prefix: /auth
+authorization-server-uri: http://${hostname}:${authorization-server-port}${authorization-server-prefix}
+gateway-port: 7081
+gateway-prefix: /gateway
+gateway-uri: ${scheme}://${hostname}:${gateway-port}${gateway-prefix}
+
+server:
+  port: ${reverse-proxy-port}
+  ssl:
+    enabled: false
+  
+
+spring:
+  application:
+    name: reverse-proxy
+  cloud:
+    gateway:
+      default-filters:
+      - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+      routes:
+      # SPAs assets
+      # - id: angular-ui
+      #   uri: ${angular-uri}
+      #   predicates:
+      #   - Path=${angular-prefix}/**
+      # - id: vue-ui
+      #   uri: ${vue-uri}
+      #   predicates:
+      #   - Path=${vue-prefix}/**
+      # - id: react-ui
+      #   uri: ${react-uri}
+      #   predicates:
+      #   - Path=${react-prefix}/**
+      
+      # Authorization-server
+      - id: authorization-server
+        uri: ${authorization-server-uri}
+        predicates:
+        - Path=${authorization-server-prefix}/**
+      
+      # Proxy BFF
+      - id: bff
+        uri: ${gateway-uri}
+        predicates:
+        - Path=${gateway-prefix}/**,/login/**,/oauth2/**,/logout,/login-options
+
+management:
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+
+logging:
+  level:
+    root: INFO
+    org:
+      springframework:
+        boot: INFO
+        web: INFO
+    
+# ---
+# spring:
+#   config:
+#     activate:
+#       on-profile: no-ssl
+# server:
+#   ssl:
+#     enabled: false
+#   port: ${reverse-proxy-port}
+
+# scheme: http
