@@ -29,6 +29,14 @@ server:
 #         jwt:
 #           issuer-uri: ${issuer}
 
+# spring:
+#   security:
+#     oauth2:
+#       resourceserver:
+#         opaquetoken:
+#           introspection-uri: ${issuer}/protocol/openid-connect/token/introspect
+#           client-id: baeldung-bff
+#           client-secret: w8DGbCb7LLWYPQVrnP8eVF4DxKeOhBok
 com:
   c4-soft:
     springaddons:

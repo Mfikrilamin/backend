@@ -16,3 +16,21 @@ services:
       KC_HOSTNAME_ADMIN_URL: http://localhost:7080/auth
       KC_HTTP_RELATIVE_PATH: /auth
       #KC_LOG_LEVEL: DEBUG
+
+  reverse-proxy:
+    build: ./reverse-proxy
+    ports:
+      - "7080:7080"
+    tty: true
+    # restart: unless-stopped
+  resource-server:
+    build: ./resource-server
+    ports:
+      - "7084:7084"
+    tty: true
+    # restart: unless-stopped
+  gateway:
+    build: ./gateway
+    ports:
+      - "7081:7081"
+    tty: true

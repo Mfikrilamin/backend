@@ -5,7 +5,7 @@ reverse-proxy-uri: ${scheme}://${hostname}:${reverse-proxy-port}
 authorization-server-prefix: /auth
 issuer: ${reverse-proxy-uri}${authorization-server-prefix}/realms/baeldung
 client-id: baeldung-bff
-client-secret: ewyy1AxH0jZ1rziyVEZLRcRiI1ZldKlf
+client-secret: w8DGbCb7LLWYPQVrnP8eVF4DxKeOhBok
 username-claim-json-path: $.preferred_username
 authorities-json-path: $.realm_access.roles
 gateway-port: 7081
@@ -21,30 +21,35 @@ server:
 spring:
   cloud:
     gateway:
-      routes:
+      default-filters:
+      - TokenRelay=
+      routes: 
         - id: gateway
           uri: ${scheme}://${hostname}:${resource-server-port}
           predicates:
             - Path=/api/**
           filters:
             - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
-            - TokenRelay=
             - SaveSession
             - StripPrefix=1
   security:
     oauth2:
       client:
         provider:
-          baeldung:
+          keycloak:
             issuer-uri: ${issuer}
         registration:
-          baeldung:
-            provider: baeldung
+          baeldung-bff:
+            provider: keycloak
             authorization-grant-type: authorization_code
             client-id: ${client-id}
             client-secret: ${client-secret}
-            scope: openid,profile,email,offline_access
-            redirect-uri: ${issuer}/login/oauth2/code/keycloak
+            scope:
+            - email
+            - profile
+            - roles 
+            # openid,profile,email,roles
+            # redirect-uri: ${issuer}/login/oauth2/code/keycloak
 
 com:
   c4-soft:
@@ -56,18 +61,20 @@ com:
               - path: ${authorities-json-path}
             aud: ${audience}
         client:
-          # client-uri: ${reverse-proxy-uri}
+          client-uri: ${reverse-proxy-uri}${gateway-prefix}
           security-matchers:
-            - /gateway/**
+            - /api/**
             - /login/**
             - /oauth2/**
             - /logout
             - /auth
+            - /**
           permit-all:
-            - /gateway/**
+            - /api/**
             - /login/**
             - /oauth2/**
             - /auth
+            - /**
           csrf: cookie-accessible-from-js
           oauth2-redirections:
             rp-initiated-logout: ACCEPTED
