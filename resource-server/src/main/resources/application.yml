@@ -3,35 +3,50 @@ hostname: localhost
 reverse-proxy-port: 7080
 reverse-proxy-uri: ${scheme}://${hostname}:${reverse-proxy-port}
 authorization-server-prefix: /auth
-issuer: ${reverse-proxy-uri}${authorization-server-prefix}/realms/master
+issuer: ${reverse-proxy-uri}${authorization-server-prefix}/realms/baeldung
 username-claim-json-path: $.preferred_username
 authorities-json-path: $.realm_access.roles
 resource-server-port: 7084
-audience: 
+audience:
 
 server:
   port: ${resource-server-port}
   ssl:
     enabled: false
 
+# spring-addons:
+#   issuers:
+#     - uri: ${issuer}
+#       username-json-path: $.preferred_username
+#       claims:
+#         - jsonPath: $.realm_access.roles
+#         - jsonPath: $.resource_access.*.roles
+
+# spring:
+#   security:
+#     oauth2:
+#       resourceserver:
+#         jwt:
+#           issuer-uri: ${issuer}
+
 com:
   c4-soft:
     springaddons:
       oidc:
         ops:
-        - iss: ${issuer}
-          username-claim: ${username-claim-json-path}
-          authorities:
-          - path: ${authorities-json-path}
-          aud: ${audience}
+          - iss: ${issuer}
+            username-claim: ${username-claim-json-path}
+            authorities:
+              - path: ${authorities-json-path}
+            aud: ${audience}
         resourceserver:
           permit-all:
-          - /me
-          - /v3/api-docs/**
-          - /swagger-ui/**
-          - /actuator/health/readiness
-          - /actuator/health/liveness
-          
+            - /me
+            - /v3/api-docs/**
+            - /swagger-ui/**
+            - /actuator/health/readiness
+            - /actuator/health/liveness
+
 management:
   endpoint:
     health:
@@ -40,7 +55,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: '*'
+        include: "*"
   health:
     livenessstate:
       enabled: true
@@ -55,7 +70,7 @@ logging:
         boot: INFO
         security: TRACE
         web: INFO
-        
+
 ---
 spring:
   config:
